@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Home, Database, Settings, Plus, Code, ChevronRight, ChevronDown, Table, BarChart3, Eye, Zap, Hash } from 'lucide-react';
 import { useConnectionStore } from '../../stores/useConnectionStore';
 import { useQueryStore } from '../../stores/useQueryStore';

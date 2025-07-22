@@ -1,0 +1,97 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    permissions:
+      contents: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: 'macos-latest' # for Arm based macs (M1 and above).
+            args: '--target aarch64-apple-darwin'
+          - platform: 'macos-latest' # for Intel based macs.
+            args: '--target x86_64-apple-darwin'
+          - platform: 'ubuntu-22.04' # for Tauri v2 you could also use ubuntu-20.04.
+            args: ''
+          - platform: 'windows-latest'
+            args: ''
+
+    runs-on: ${{ matrix.platform }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install dependencies (ubuntu only)
+        if: matrix.platform == 'ubuntu-22.04' # This must match the platform value defined above.
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
+
+      - name: Rust setup
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          # Those targets are only used on macos runners so it's in an `if` to slightly speed up the linux and windows builds.
+          targets: ${{ matrix.platform == 'macos-latest' && 'aarch64-apple-darwin,x86_64-apple-darwin' || '' }}
+
+      - name: Rust cache
+        uses: swatinem/rust-cache@v2
+        with:
+          workspaces: './src-tauri -> target'
+
+      - name: Sync node version and install dependencies
+        uses: actions/setup-node@v4
+        with:
+          node-version: 'lts/*'
+          cache: 'npm' # Set this to npm, yarn or pnpm.
+
+      - name: Install frontend dependencies
+        # If you don't have `beforeBuildCommand` configured you may want to build your frontend here too.
+        run: npm install # change this to npm or pnpm depending on which one you use.
+
+      - name: Build the app
+        uses: tauri-apps/tauri-action@v0
+
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tagName: ${{ github.ref_name }} # This only works if your workflow triggers on new tags.
+          releaseName: 'Serphic v__VERSION__' # tauri-action replaces \_\_VERSION\_\_ with the app version.
+          releaseBody: |
+            ## 🚀 Serphic v__VERSION__
+            
+            ### ✨ 新功能
+            - 完整的透明效果支援（CSS、Tauri 標籤式窗口、Window Vibrancy）
+            - 跨平台數據庫連接管理（MySQL、PostgreSQL、SQLite）
+            - 直觀的 SQL 查詢界面
+            - 可自定義的主題和透明效果設置
+            
+            ### 🔧 技術特性
+            - Windows 10/11 透明效果兼容性
+            - 標籤式窗口效果
+            - 原生平台透明效果
+            - 響應式設計
+            
+            ### 📥 下載說明
+            - **Windows**: 下載 `.msi` 或 `.exe` 安裝包
+            - **macOS**: 下載 `.app.tar.gz` 並解壓
+            - **Linux**: 下載 `.AppImage` 或 `.deb` 包
+            
+            ### 🐛 問題回報
+            如有問題，請在 [Issues](https://github.com/your-username/Serphic/issues) 中回報。
+            
+            ---
+            
+            See the assets to download and install this version.
+          releaseDraft: false
+          prerelease: false
+          args: ${{ matrix.args }} 

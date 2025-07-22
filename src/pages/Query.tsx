@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Play, Save, History, Database } from 'lucide-react';
+import { Play, History, Database } from 'lucide-react';
 import Button from '../components/ui/Button';
 import Toast from '../components/ui/Toast';
 import { useConnectionStore } from '../stores/useConnectionStore';

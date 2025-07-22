@@ -254,8 +254,8 @@ const Connections: React.FC = () => {
                       </label>
                       <select
                         value={connectionForm.type}
-                        onChange={(e) => setConnectionForm({ ...connectionForm, type: e.target.value })}
-                        className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        onChange={(e) => setConnectionForm({ ...connectionForm, type: e.target.value as "mysql" | "postgresql" | "sqlite" })}
+                        className="mt-1 block w-full rounded-md border-gray-600 bg-gray-700 text-white shadow-sm focus:border-blue-500 focus:ring-blue-500"
                       >
                         <option value="mysql">MySQL</option>
                         <option value="postgresql">PostgreSQL</option>

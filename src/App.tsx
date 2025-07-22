@@ -14,10 +14,14 @@ const App: React.FC = () => {
   // 應用主題設置
   useTheme();
 
+  const handleNavigateToConnections = () => {
+    setCurrentPage('connections');
+  };
+
   const renderPage = () => {
     switch (currentPage) {
       case 'home':
-        return <Home />;
+        return <Home onNavigateToConnections={handleNavigateToConnections} />;
       case 'connections':
         return <Connections />;
       case 'query':
@@ -25,8 +29,8 @@ const App: React.FC = () => {
       case 'settings':
         return <Settings />;
       default:
-        return <Home />;
-  }
+        return <Home onNavigateToConnections={handleNavigateToConnections} />;
+    }
   };
 
   return (
