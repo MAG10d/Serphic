@@ -1,1 +1,166 @@
-@import "tailwindcss"; 
+@import "tailwindcss";
+
+/* CSS 變數 */
+:root {
+  --accent-color: #3b82f6;
+}
+
+/* Windows 11 透明效果支援 */
+html, body {
+  background: transparent;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+#root {
+  background: rgba(13, 13, 13, 0.85); /* 預設透明度 */
+  backdrop-filter: blur(20px) saturate(150%);
+  -webkit-backdrop-filter: blur(20px) saturate(150%);
+  min-height: 100vh;
+  border-radius: 8px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+/* 針對不同透明效果的特殊處理 */
+#root.effect-acrylic {
+  background: rgba(20, 20, 20, 0.75);
+  backdrop-filter: blur(30px) saturate(120%) brightness(110%) contrast(105%);
+  -webkit-backdrop-filter: blur(30px) saturate(120%) brightness(110%) contrast(105%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1), 
+              inset 0 -1px 0 rgba(255, 255, 255, 0.05);
+}
+
+#root.effect-mica {
+  background: rgba(25, 25, 25, 0.6);
+  backdrop-filter: blur(12px) saturate(200%) brightness(90%) hue-rotate(5deg);
+  -webkit-backdrop-filter: blur(12px) saturate(200%) brightness(90%) hue-rotate(5deg);
+}
+
+#root.effect-mica::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(circle at 30% 20%, rgba(255, 255, 255, 0.02) 0%, transparent 50%),
+              radial-gradient(circle at 70% 80%, rgba(0, 123, 255, 0.03) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: -1;
+}
+
+#root.effect-mica-alt {
+  background: rgba(15, 15, 15, 0.8);
+  backdrop-filter: blur(8px) saturate(180%) brightness(80%) contrast(110%);
+  -webkit-backdrop-filter: blur(8px) saturate(180%) brightness(80%) contrast(110%);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+#root.effect-mica-alt::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, 
+    rgba(255, 255, 255, 0.01) 0%, 
+    transparent 30%, 
+    rgba(0, 0, 0, 0.02) 100%);
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* 針對 Windows 11 的亞克力效果 */
+@supports (backdrop-filter: blur(20px)) {
+  #root {
+    background: rgba(13, 13, 13, 0.7);
+  }
+}
+
+/* 改善透明背景下的元素 */
+.bg-gray-900 {
+  background-color: rgba(17, 24, 39, 0.85) !important;
+  backdrop-filter: blur(10px);
+}
+
+.bg-gray-800 {
+  background-color: rgba(31, 41, 55, 0.85) !important;
+  backdrop-filter: blur(10px);
+}
+
+.bg-gray-700 {
+  background-color: rgba(55, 65, 81, 0.85) !important;
+  backdrop-filter: blur(10px);
+}
+
+/* 邊框在透明背景下的調整 */
+.border-gray-600 {
+  border-color: rgba(75, 85, 99, 0.5) !important;
+}
+
+/* 增強文字對比度 */
+.text-white {
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+/* 透明按鈕效果 */
+.hover\:bg-gray-700:hover {
+  background-color: rgba(55, 65, 81, 0.8) !important;
+  backdrop-filter: blur(10px);
+}
+
+/* 玻璃效果的卡片 */
+.glass-card {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  transition: all 0.3s ease;
+}
+
+.glass-card:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+/* 使用動態主色調 */
+.bg-blue-600 {
+  background-color: var(--accent-color) !important;
+}
+
+.text-blue-400 {
+  color: var(--accent-color) !important;
+}
+
+.border-blue-500 {
+  border-color: var(--accent-color) !important;
+}
+
+/* 滑桿樣式 */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 16px;
+  width: 16px;
+  border-radius: 50%;
+  background: var(--accent-color);
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+input[type="range"]::-moz-range-thumb {
+  height: 16px;
+  width: 16px;
+  border-radius: 50%;
+  background: var(--accent-color);
+  cursor: pointer;
+  border: none;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+} 

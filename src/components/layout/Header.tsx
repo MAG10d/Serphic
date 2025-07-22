@@ -5,7 +5,7 @@ const Header: React.FC = () => {
   const isConnected = false; // TODO: 從狀態管理獲取實際連接狀態
 
   return (
-    <header className="h-12 bg-gray-800 border-b border-gray-600 flex items-center justify-between px-4 flex-shrink-0">
+    <header className="h-12 bg-gray-800/90 backdrop-blur-md border-b border-gray-600/50 flex items-center justify-between px-4 flex-shrink-0">
       {/* Logo and App Name */}
       <div className="flex items-center space-x-2">
         <Database className="w-5 h-5 text-white" />

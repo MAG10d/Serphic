@@ -16,7 +16,10 @@
         "width": 1200,
         "height": 800,
         "minWidth": 1000,
-        "minHeight": 700
+        "minHeight": 700,
+        "transparent": true,
+        "decorations": true,
+        "shadow": true
       }
     ],
     "security": {

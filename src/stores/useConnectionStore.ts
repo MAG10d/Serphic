@@ -15,7 +15,7 @@ interface ConnectionStore {
   testConnection: (connection: DatabaseConnection) => Promise<boolean>;
 }
 
-export const useConnectionStore = create<ConnectionStore>((set, get) => ({
+export const useConnectionStore = create<ConnectionStore>((set) => ({
   connections: [],
   activeConnection: null,
   connectionStatus: 'disconnected',
@@ -55,7 +55,7 @@ export const useConnectionStore = create<ConnectionStore>((set, get) => ({
     set({ connectionStatus: status });
   },
 
-  testConnection: async (connection) => {
+  testConnection: async (_connection) => {
     // TODO: 實現與 Tauri 後端的連接測試
     try {
       set({ connectionStatus: 'connecting' });

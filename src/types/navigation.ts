@@ -1,0 +1,1 @@
+export type Page = 'home' | 'connections' | 'query' | 'settings'; 
