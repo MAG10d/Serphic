@@ -243,9 +243,8 @@ async fn apply_tauri_builtin_effect(window: &WebviewWindow, config: &TauriBuilti
     });
     
     // 嘗試使用 Tauri 內建 API
-    match window.eval(&format!(
-        "window.__TAURI__.window.getCurrentWindow().setEffects({})",
-        effects_config
+    match window.eval(format!(
+        "window.__TAURI__.window.getCurrentWindow().setEffects({effects_config})"
     )) {
         Ok(_) => Ok(format!("Tauri 內建 {effect_type} 效果已應用 - 狀態: {effect_state}")),
         Err(e) => Ok(format!("Tauri 內建效果配置完成（可能需要較新版本）: {effect_type} - {e}")),
@@ -722,7 +721,7 @@ async fn get_sqlite_tables(connection: &DatabaseConnection) -> Result<DatabaseTa
 
         // 獲取記錄數（只對表格和檢視表）
         let row_count = if object_type == "table" || object_type == "view" {
-            let count_query = format!("SELECT COUNT(*) as count FROM \"{}\"", object_name);
+            let count_query = format!("SELECT COUNT(*) as count FROM \"{object_name}\"");
             let count_result = sqlx::query(&count_query)
                 .fetch_one(&pool)
                 .await;
