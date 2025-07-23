@@ -10,7 +10,7 @@ use window_vibrancy::{apply_blur, apply_mica, apply_acrylic, clear_blur, clear_m
 use window_vibrancy::{apply_vibrancy, NSVisualEffectMaterial, NSVisualEffectBlendingMode, NSVisualEffectState};
 
 #[cfg(target_os = "linux")]
-use window_vibrancy::apply_gtk_blur;
+use window_vibrancy::apply_blur;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct DatabaseConnection {
@@ -314,7 +314,7 @@ async fn apply_window_vibrancy_effect(window: &WebviewWindow, config: &WindowVib
     
     #[cfg(target_os = "linux")]
     {
-        match apply_gtk_blur(window) {
+        match apply_blur(window, None) {
             Ok(_) => Ok("Linux GTK 模糊效果已應用".to_string()),
             Err(e) => Err(format!("Linux GTK 模糊效果應用失敗: {}", e))
         }
