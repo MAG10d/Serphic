@@ -2,15 +2,12 @@ use serde::{Deserialize, Serialize};
 use sqlx::{Column, Row, TypeInfo};
 use tauri::WebviewWindow;
 
-// 重新啟用 window-vibrancy，使用最新版本應該兼容 Tauri 2.0
+// window-vibrancy 只在 Windows 和 macOS 上可用
 #[cfg(target_os = "windows")]
 use window_vibrancy::{apply_blur, apply_mica, apply_acrylic, clear_blur, clear_mica, clear_acrylic};
 
 #[cfg(target_os = "macos")]
 use window_vibrancy::{apply_vibrancy, NSVisualEffectMaterial, NSVisualEffectBlendingMode, NSVisualEffectState};
-
-#[cfg(target_os = "linux")]
-use window_vibrancy::apply_blur;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct DatabaseConnection {
@@ -313,15 +310,13 @@ async fn apply_window_vibrancy_effect(window: &WebviewWindow, config: &WindowVib
     
     #[cfg(target_os = "linux")]
     {
-        match apply_blur(window, None) {
-            Ok(_) => Ok("Linux GTK 模糊效果已應用".to_string()),
-            Err(e) => Err(format!("Linux GTK 模糊效果應用失敗: {e}")),
-        }
+        // Linux 不支援 window-vibrancy，效果由 compositor 控制
+        Ok("Linux 不支援 window-vibrancy，透明效果由系統 compositor 控制".to_string())
     }
     
-    #[cfg(not(any(target_os = "windows", target_os = "macos", target_os = "linux")))]
+    #[cfg(target_os = "linux")]
     {
-        Err("當前平台不支援 window-vibrancy 效果".to_string())
+        Ok("window-vibrancy 效果在此平台或配置下不可用，使用 CSS 透明效果替代".to_string())
     }
 }
 
@@ -350,7 +345,7 @@ async fn clear_transparency_effect(window: WebviewWindow, method: String) -> Res
             
             #[cfg(not(target_os = "windows"))]
             {
-                Ok("非 Windows 平台，透明效果清除完成".to_string())
+                Ok("透明效果清除完成".to_string())
             }
         },
         
