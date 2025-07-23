@@ -211,7 +211,7 @@ async fn set_transparency_effect(window: WebviewWindow, config: TransparencyConf
             }
         },
         
-        _ => Err(format!("不支援的透明效果方案: {method}")),
+        _ => Err(format!("不支援的透明效果方案: {}", config.method)),
     }
 }
 
@@ -277,7 +277,7 @@ async fn apply_window_vibrancy_effect(window: &WebviewWindow, config: &WindowVib
                     Err(e) => Err(format!("Windows Mica 效果應用失敗: {e}")),
                 }
             },
-            _ => Err(format!("Windows 不支援的效果類型: {effect_type}")),
+            _ => Err(format!("Windows 不支援的效果類型: {}", config.effect_type)),
         }
     }
     
@@ -307,7 +307,7 @@ async fn apply_window_vibrancy_effect(window: &WebviewWindow, config: &WindowVib
         };
         
         match apply_vibrancy(window, material, Some(state), Some(blending_mode)) {
-            Ok(_) => Ok(format!("macOS {effect_type} 效果已應用", effect_type = config.effect_type)),
+            Ok(_) => Ok(format!("macOS {} 效果已應用", config.effect_type)),
             Err(e) => Err(format!("macOS Vibrancy 效果應用失敗: {e}")),
         }
     }
