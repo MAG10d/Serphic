@@ -313,11 +313,6 @@ async fn apply_window_vibrancy_effect(window: &WebviewWindow, config: &WindowVib
         // Linux 不支援 window-vibrancy，效果由 compositor 控制
         Ok("Linux 不支援 window-vibrancy，透明效果由系統 compositor 控制".to_string())
     }
-    
-    #[cfg(target_os = "linux")]
-    {
-        Ok("window-vibrancy 效果在此平台或配置下不可用，使用 CSS 透明效果替代".to_string())
-    }
 }
 
 // 清除透明效果命令
