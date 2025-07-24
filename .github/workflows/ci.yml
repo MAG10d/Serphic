@@ -45,13 +45,27 @@ jobs:
     - name: Run frontend type checking
       run: npx tsc --noEmit
 
+    # Add Rust compilation check before tests
+    - name: Check Rust compilation
+      working-directory: ./src-tauri
+      run: |
+        echo "Checking Rust compilation..."
+        cargo check --verbose
+        echo "Rust compilation check completed successfully"
+
     - name: Run Rust tests
       working-directory: ./src-tauri
-      run: cargo test
+      run: |
+        echo "Running Rust tests..."
+        cargo test --verbose
+        echo "Rust tests completed"
 
     - name: Run Rust linting
       working-directory: ./src-tauri
-      run: cargo clippy -- -D warnings
+      run: |
+        echo "Running Rust linting..."
+        cargo clippy --all-targets --all-features -- -D warnings
+        echo "Rust linting completed"
 
     - name: Build frontend
       run: npm run build
@@ -92,9 +106,18 @@ jobs:
     - name: Install frontend dependencies
       run: npm ci
 
+    # Add debug information
+    - name: Debug build environment
+      run: |
+        echo "Platform: ${{ matrix.platform }}"
+        echo "OS: ${{ runner.os }}"
+        echo "Architecture: ${{ runner.arch }}"
+        rustc --version
+        cargo --version
+
     - name: Build Tauri app (test build)
       uses: tauri-apps/tauri-action@v0
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        args: --debug 
+        args: --debug --verbose 

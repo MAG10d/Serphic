@@ -1,0 +1,24 @@
+[build]
+# Improve compilation speed in CI
+rustflags = ["-C", "link-arg=-s"]
+
+[target.x86_64-unknown-linux-gnu]
+# Linux-specific build settings
+rustflags = ["-C", "link-arg=-Wl,--as-needed"]
+
+[target.x86_64-pc-windows-msvc]
+# Windows-specific build settings
+rustflags = ["-C", "target-cpu=native"]
+
+[target.x86_64-apple-darwin]
+# macOS-specific build settings  
+rustflags = ["-C", "target-cpu=native"]
+
+[target.aarch64-apple-darwin]
+# Apple Silicon specific settings
+rustflags = ["-C", "target-cpu=native"]
+
+# Environment variables for better CI builds
+[env]
+CARGO_INCREMENTAL = "0"
+RUST_BACKTRACE = "1" 

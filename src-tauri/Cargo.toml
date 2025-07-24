@@ -14,6 +14,10 @@ edition = "2021"
 name = "tauri_app_lib"
 crate-type = ["staticlib", "cdylib", "rlib"]
 
+[features]
+default = ["vibrancy"]
+vibrancy = []
+
 [build-dependencies]
 tauri-build = { version = "2", features = [] }
 
@@ -27,5 +31,6 @@ sqlx = { version = "0.8", features = ["runtime-tokio-rustls", "mysql", "postgres
 uuid = { version ="1", features = ["v4"] }
 tokio = { version = "1", features = ["full"] }
 
+# Platform-specific dependencies - only include on Windows and macOS
 [target.'cfg(any(target_os = "windows", target_os = "macos"))'.dependencies]
 window-vibrancy = "0.6"
