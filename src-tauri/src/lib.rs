@@ -97,7 +97,7 @@ pub struct DatabaseTablesResult {
 // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
 #[tauri::command]
 fn greet(name: &str) -> String {
-    format!("Hello, {}! You've been greeted from Rust!", name)
+    format!("Hello, {name}! You've been greeted from Rust!")
 }
 
 #[tauri::command]
@@ -121,7 +121,7 @@ async fn test_database_connection(connection: DatabaseConnection) -> Result<Test
         }),
         Err(error) => Ok(TestResult {
             success: false,
-            message: format!("連接失敗: {}", error),
+            message: format!("連接失敗: {error}"),
             execution_time,
         }),
     }
@@ -151,7 +151,7 @@ async fn execute_query(request: QueryRequest) -> Result<QueryResult, String> {
             rows: vec![],
             affected_rows: None,
             execution_time,
-            message: format!("查詢錯誤: {}", error),
+            message: format!("查詢錯誤: {error}"),
         }),
     }
 }
@@ -211,7 +211,10 @@ async fn set_transparency_effect(window: WebviewWindow, config: TransparencyConf
             }
         },
         
-        _ => Err(format!("不支援的透明效果方案: {}", config.method))
+        _ => {
+            let method = &config.method;
+            Err(format!("不支援的透明效果方案: {method}"))
+        }
     }
 }
 
@@ -243,12 +246,14 @@ async fn apply_tauri_builtin_effect(window: &WebviewWindow, config: &TauriBuilti
     });
     
     // 嘗試使用 Tauri 內建 API
-    match window.eval(&format!(
+    #[allow(clippy::uninlined_format_args)]
+    let script = format!(
         "window.__TAURI__.window.getCurrentWindow().setEffects({})",
         effects_config
-    )) {
-        Ok(_) => Ok(format!("Tauri 內建 {} 效果已應用 - 狀態: {}", effect_type, effect_state)),
-        Err(e) => Ok(format!("Tauri 內建效果配置完成（可能需要較新版本）: {} - {}", effect_type, e))
+    );
+    match window.eval(&script) {
+        Ok(_) => Ok(format!("Tauri 內建 {effect_type} 效果已應用 - 狀態: {effect_state}")),
+        Err(e) => Ok(format!("Tauri 內建效果配置完成（可能需要較新版本）: {effect_type} - {e}"))
     }
 }
 
@@ -262,22 +267,25 @@ async fn apply_window_vibrancy_effect(window: &WebviewWindow, config: &WindowVib
                 // 嘗試使用 window-vibrancy，但使用 Tauri 2.0 兼容的方式
                 match apply_blur(window, None) {
                     Ok(_) => Ok("Windows Blur 效果已應用".to_string()),
-                    Err(e) => Err(format!("Windows Blur 效果應用失敗: {}", e))
+                    Err(e) => Err(format!("Windows Blur 效果應用失敗: {e}"))
                 }
             },
             "acrylic" => {
                 match apply_acrylic(window, None) {
                     Ok(_) => Ok("Windows Acrylic 效果已應用".to_string()),
-                    Err(e) => Err(format!("Windows Acrylic 效果應用失敗: {}", e))
+                    Err(e) => Err(format!("Windows Acrylic 效果應用失敗: {e}"))
                 }
             },
             "mica" => {
                 match apply_mica(window, None) {
                     Ok(_) => Ok("Windows Mica 效果已應用".to_string()),
-                    Err(e) => Err(format!("Windows Mica 效果應用失敗: {}", e))
+                    Err(e) => Err(format!("Windows Mica 效果應用失敗: {e}"))
                 }
             },
-            _ => Err(format!("Windows 不支援的效果類型: {}", config.effect_type))
+            _ => {
+                let effect_type = &config.effect_type;
+                Err(format!("Windows 不支援的效果類型: {effect_type}"))
+            }
         }
     }
     
@@ -307,8 +315,11 @@ async fn apply_window_vibrancy_effect(window: &WebviewWindow, config: &WindowVib
         };
         
         match apply_vibrancy(window, material, Some(state), Some(blending_mode)) {
-            Ok(_) => Ok(format!("macOS {} 效果已應用", config.effect_type)),
-            Err(e) => Err(format!("macOS Vibrancy 效果應用失敗: {}", e))
+            Ok(_) => {
+                let effect_type = &config.effect_type;
+                Ok(format!("macOS {effect_type} 效果已應用"))
+            },
+            Err(e) => Err(format!("macOS Vibrancy 效果應用失敗: {e}"))
         }
     }
     
@@ -316,7 +327,7 @@ async fn apply_window_vibrancy_effect(window: &WebviewWindow, config: &WindowVib
     {
         match apply_gtk_blur(window) {
             Ok(_) => Ok("Linux GTK 模糊效果已應用".to_string()),
-            Err(e) => Err(format!("Linux GTK 模糊效果應用失敗: {}", e))
+            Err(e) => Err(format!("Linux GTK 模糊效果應用失敗: {e}"))
         }
     }
     
@@ -336,7 +347,7 @@ async fn clear_transparency_effect(window: WebviewWindow, method: String) -> Res
             // 使用 Tauri 2.0 內建 API 清除效果
             match window.eval("window.__TAURI__.window.getCurrentWindow().clearEffects()") {
                 Ok(_) => Ok("Tauri 內建透明效果已清除".to_string()),
-                Err(e) => Ok(format!("透明效果清除完成: {}", e))
+                Err(e) => Ok(format!("透明效果清除完成: {e}"))
             }
         },
         
@@ -373,7 +384,7 @@ async fn execute_sqlite_query(connection: &DatabaseConnection, sql: &str) -> Res
             .create_if_missing(false)
     )
     .await
-    .map_err(|e| format!("SQLite 連接錯誤: {}", e))?;
+    .map_err(|e| format!("SQLite 連接錯誤: {e}"))?;
 
     // 檢查是否為 SELECT 查詢
     let trimmed_sql = sql.trim().to_lowercase();
@@ -384,7 +395,7 @@ async fn execute_sqlite_query(connection: &DatabaseConnection, sql: &str) -> Res
         let rows = sqlx::query(sql)
             .fetch_all(&pool)
             .await
-            .map_err(|e| format!("查詢執行錯誤: {}", e))?;
+            .map_err(|e| format!("查詢執行錯誤: {e}"))?;
 
         if rows.is_empty() {
             pool.close().await;
@@ -457,26 +468,26 @@ async fn execute_sqlite_query(connection: &DatabaseConnection, sql: &str) -> Res
             rows: result_rows,
             affected_rows: Some(row_count as u64),
             execution_time: 0,
-            message: format!("查詢成功，返回 {} 行", row_count),
+            message: format!("查詢成功，返回 {row_count} 行"),
         })
     } else {
         // 非 SELECT 查詢 (INSERT, UPDATE, DELETE, CREATE, etc.)
         let result = sqlx::query(sql)
             .execute(&pool)
             .await
-            .map_err(|e| format!("執行錯誤: {}", e))?;
+            .map_err(|e| format!("執行錯誤: {e}"))?;
 
         let affected_rows = result.rows_affected();
         let message = if trimmed_sql.starts_with("create") {
             "表格創建成功".to_string()
         } else if trimmed_sql.starts_with("insert") {
-            format!("插入成功，影響 {} 行", affected_rows)
+            format!("插入成功，影響 {affected_rows} 行")
         } else if trimmed_sql.starts_with("update") {
-            format!("更新成功，影響 {} 行", affected_rows)
+            format!("更新成功，影響 {affected_rows} 行")
         } else if trimmed_sql.starts_with("delete") {
-            format!("刪除成功，影響 {} 行", affected_rows)
+            format!("刪除成功，影響 {affected_rows} 行")
         } else {
-            format!("執行成功，影響 {} 行", affected_rows)
+            format!("執行成功，影響 {affected_rows} 行")
         };
 
         pool.close().await;
@@ -504,7 +515,7 @@ async fn execute_mysql_query(connection: &DatabaseConnection, sql: &str) -> Resu
 
     let pool = sqlx::mysql::MySqlPool::connect(&database_url)
         .await
-        .map_err(|e| format!("MySQL 連接錯誤: {}", e))?;
+        .map_err(|e| format!("MySQL 連接錯誤: {e}"))?;
 
     // 簡化版：目前只支持基本查詢
     let trimmed_sql = sql.trim().to_lowercase();
@@ -514,7 +525,7 @@ async fn execute_mysql_query(connection: &DatabaseConnection, sql: &str) -> Resu
         let rows = sqlx::query(sql)
             .fetch_all(&pool)
             .await
-            .map_err(|e| format!("查詢執行錯誤: {}", e))?;
+            .map_err(|e| format!("查詢執行錯誤: {e}"))?;
 
         if rows.is_empty() {
             return Ok(QueryResult {
@@ -545,15 +556,16 @@ async fn execute_mysql_query(connection: &DatabaseConnection, sql: &str) -> Resu
         let result = sqlx::query(sql)
             .execute(&pool)
             .await
-            .map_err(|e| format!("執行錯誤: {}", e))?;
-
+            .map_err(|e| format!("執行錯誤: {e}"))?;
+        
+        let rows_affected = result.rows_affected();
         Ok(QueryResult {
             success: true,
             columns: vec![],
             rows: vec![],
-            affected_rows: Some(result.rows_affected()),
+            affected_rows: Some(rows_affected),
             execution_time: 0,
-            message: format!("執行成功，影響 {} 行", result.rows_affected()),
+            message: format!("執行成功，影響 {rows_affected} 行"),
         })
     }
 }
@@ -582,20 +594,20 @@ async fn test_mysql_connection(connection: &DatabaseConnection) -> Result<String
 
     let pool = sqlx::mysql::MySqlPool::connect(&database_url)
         .await
-        .map_err(|e| format!("MySQL 連接錯誤: {}", e))?;
+        .map_err(|e| format!("MySQL 連接錯誤: {e}"))?;
 
     // 測試查詢
     let row = sqlx::query("SELECT VERSION() as version")
         .fetch_one(&pool)
         .await
-        .map_err(|e| format!("查詢錯誤: {}", e))?;
+        .map_err(|e| format!("查詢錯誤: {e}"))?;
 
     let version: String = row.try_get("version")
-        .map_err(|e| format!("取得版本錯誤: {}", e))?;
+        .map_err(|e| format!("取得版本錯誤: {e}"))?;
 
     pool.close().await;
 
-    Ok(format!("MySQL 連接成功！版本: {}", version))
+    Ok(format!("MySQL 連接成功！版本: {version}"))
 }
 
 async fn test_postgres_connection(connection: &DatabaseConnection) -> Result<String, String> {
@@ -630,9 +642,10 @@ async fn test_postgres_connection(connection: &DatabaseConnection) -> Result<Str
     let pool = sqlx::postgres::PgPool::connect(&database_url)
         .await
         .map_err(|e| {
-            let error_msg = format!("{}", e);
+            let error_msg = format!("{e}");
             if error_msg.contains("11001") || error_msg.contains("無法識別這台主機") {
-                format!("DNS 解析失敗: 無法找到主機 {}。請檢查主機名稱是否正確，或嘗試使用 IP 地址", connection.host)
+                let host = &connection.host;
+                format!("DNS 解析失敗: 無法找到主機 {host}。請檢查主機名稱是否正確，或嘗試使用 IP 地址")
             } else if error_msg.contains("timeout") {
                 "連接超時: 請檢查網路連接和防火牆設置".to_string()
             } else if error_msg.contains("authentication") {
@@ -642,9 +655,10 @@ async fn test_postgres_connection(connection: &DatabaseConnection) -> Result<Str
             } else if error_msg.contains("password authentication failed") {
                 "密碼錯誤: 請檢查用戶名和密碼是否正確".to_string()
             } else if error_msg.contains("database") && error_msg.contains("does not exist") {
-                format!("資料庫不存在: 資料庫 '{}' 不存在", connection.database)
+                let database = &connection.database;
+                format!("資料庫不存在: 資料庫 '{database}' 不存在")
             } else {
-                format!("PostgreSQL 連接錯誤: {}", e)
+                format!("PostgreSQL 連接錯誤: {e}")
             }
         })?;
 
@@ -652,14 +666,14 @@ async fn test_postgres_connection(connection: &DatabaseConnection) -> Result<Str
     let row = sqlx::query("SELECT version()")
         .fetch_one(&pool)
         .await
-        .map_err(|e| format!("查詢錯誤: {}", e))?;
+        .map_err(|e| format!("查詢錯誤: {e}"))?;
 
     let version: String = row.try_get("version")
-        .map_err(|e| format!("取得版本錯誤: {}", e))?;
+        .map_err(|e| format!("取得版本錯誤: {e}"))?;
 
     pool.close().await;
 
-    Ok(format!("PostgreSQL 連接成功！版本: {}", version))
+    Ok(format!("PostgreSQL 連接成功！版本: {version}"))
 }
 
 async fn test_sqlite_connection(connection: &DatabaseConnection) -> Result<String, String> {
@@ -670,24 +684,24 @@ async fn test_sqlite_connection(connection: &DatabaseConnection) -> Result<Strin
         connection.database.clone()
     };
 
-    let database_url = format!("sqlite:{}", database_path);
+    let database_url = format!("sqlite:{database_path}");
 
     let pool = sqlx::sqlite::SqlitePool::connect(&database_url)
         .await
-        .map_err(|e| format!("SQLite 連接錯誤: {}", e))?;
+        .map_err(|e| format!("SQLite 連接錯誤: {e}"))?;
 
     // 測試查詢
     let row = sqlx::query("SELECT sqlite_version() as version")
         .fetch_one(&pool)
         .await
-        .map_err(|e| format!("查詢錯誤: {}", e))?;
+        .map_err(|e| format!("查詢錯誤: {e}"))?;
 
     let version: String = row.try_get("version")
-        .map_err(|e| format!("取得版本錯誤: {}", e))?;
+        .map_err(|e| format!("取得版本錯誤: {e}"))?;
 
     pool.close().await;
 
-    Ok(format!("SQLite 連接成功！版本: {}", version))
+    Ok(format!("SQLite 連接成功！版本: {version}"))
 }
 
 async fn get_sqlite_tables(connection: &DatabaseConnection) -> Result<DatabaseTablesResult, String> {
@@ -699,7 +713,7 @@ async fn get_sqlite_tables(connection: &DatabaseConnection) -> Result<DatabaseTa
 
     let pool = sqlx::sqlite::SqlitePool::connect(&database_path)
         .await
-        .map_err(|e| format!("SQLite 連接錯誤: {}", e))?;
+        .map_err(|e| format!("SQLite 連接錯誤: {e}"))?;
 
     // 獲取所有資料庫對象（表格、檢視表、索引、觸發器）
     let table_rows = sqlx::query(
@@ -710,19 +724,19 @@ async fn get_sqlite_tables(connection: &DatabaseConnection) -> Result<DatabaseTa
     )
         .fetch_all(&pool)
         .await
-        .map_err(|e| format!("查詢資料庫對象錯誤: {}", e))?;
+        .map_err(|e| format!("查詢資料庫對象錯誤: {e}"))?;
 
     let mut tables = Vec::new();
 
     for row in table_rows {
         let object_name: String = row.try_get("name")
-            .map_err(|e| format!("取得對象名稱錯誤: {}", e))?;
+            .map_err(|e| format!("取得對象名稱錯誤: {e}"))?;
         let object_type: String = row.try_get("type")
-            .map_err(|e| format!("取得對象類型錯誤: {}", e))?;
+            .map_err(|e| format!("取得對象類型錯誤: {e}"))?;
 
         // 獲取記錄數（只對表格和檢視表）
         let row_count = if object_type == "table" || object_type == "view" {
-            let count_query = format!("SELECT COUNT(*) as count FROM \"{}\"", object_name);
+            let count_query = format!("SELECT COUNT(*) as count FROM \"{object_name}\"");
             let count_result = sqlx::query(&count_query)
                 .fetch_one(&pool)
                 .await;
@@ -751,7 +765,7 @@ async fn get_sqlite_tables(connection: &DatabaseConnection) -> Result<DatabaseTa
     Ok(DatabaseTablesResult {
         success: true,
         tables,
-        message: format!("找到 {} 個資料庫對象", table_count),
+        message: format!("找到 {table_count} 個資料庫對象"),
     })
 }
 
